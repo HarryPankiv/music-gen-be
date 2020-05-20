@@ -1,0 +1,9 @@
+{
+  "name": "music-gen-be",
+  "version": "1.0.0",
+  "main": "handler.js",
+  "repository": "https://github.com/HarryPankiv/music-gen-be.git",
+  "author": "Ihor Pankiv <harry.pankiv@gmail.com>",
+  "license": "MIT",
+  "private": true
+}
