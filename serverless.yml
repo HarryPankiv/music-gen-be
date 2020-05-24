@@ -22,10 +22,21 @@ org: harrypankiv
 provider:
   name: aws
   runtime: nodejs12.x
+  iamRoleStatements:
+    -  Effect: "Allow"
+       Action:
+         - "dynamodb:Scan"
+       Resource: "arn:aws:dynamodb:us-east-1:225558997672:table/project"
 
 outputs:
   custom-output: any-value-here
 
+plugins:
+  - serverless-webpack
+
+webpack:
+    webpackConfig: ./webpack.config.js
+    includeModules: true
 # you can overwrite defaults here
 #  stage: dev
 #  region: us-east-1
@@ -61,10 +72,10 @@ outputs:
 
 functions:
   hello:
-    handler: handler.hello
+    handler: src/functions/handler.handler
     events:
       - http:
-          path: hello
+          path: handler
           method: get
           cors: true
 #    The following are a few example events you can configure
