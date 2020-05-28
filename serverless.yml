@@ -71,12 +71,19 @@ webpack:
 #    - exclude-me-dir/**
 
 functions:
-  hello:
-    handler: src/functions/handler.handler
+  getGeneratedAudio:
+    handler: src/functions/getGeneratedAudio.getGeneratedAudio
     events:
       - http:
-          path: handler
+          path: getGeneratedAudio
           method: get
+          cors: true
+  generateAudio:
+    handler: src/functions/generateAudio.generateAudio
+    events:
+      - http:
+          path: generateAudio
+          method: post
           cors: true
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
