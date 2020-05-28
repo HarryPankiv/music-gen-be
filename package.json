@@ -8,7 +8,9 @@
   "private": true,
   "dependencies": {
     "@magenta/music": "^1.15.0",
-    "aws-sdk": "^2.683.0"
+    "@tonaljs/tonal": "^4.0.1",
+    "aws-sdk": "^2.683.0",
+    "uuid": "^8.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.9.6",
