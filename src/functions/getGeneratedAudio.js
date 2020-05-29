@@ -1,14 +1,20 @@
 "use strict";
-const { dynamodb } = require("../utils/aws");
+import { dynamodb } from "../utils/aws";
 
-module.exports.getGeneratedAudio = async (event) => {
+module.exports.getGeneratedAudio = async ({
+  queryStringParameters: { projectId },
+}) => {
   const params = {
+    ExpressionAttributeValues: {
+      ":projectId": projectId,
+    },
+    KeyConditionExpression: "id = :projectId",
     TableName: "project",
   };
 
   try {
-    const result = await dynamodb.scan(params).promise();
-    
+    const result = await dynamodb.query(params).promise();
+
     return {
       statusCode: 200,
       headers: {
@@ -28,9 +34,7 @@ module.exports.getGeneratedAudio = async (event) => {
 
     return {
       statusCode: 500,
-      body: JSON.stringify(
-        err
-      )
-    }
+      body: JSON.stringify(err),
+    };
   }
 };
