@@ -3,6 +3,8 @@ node_modules
 jspm_packages
 
 .vscode
-
+.DS_Store
 # Serverless directories
 .serverless
+
+.webpack

@@ -1,15 +1,20 @@
 {
   "name": "music-gen-be",
   "version": "1.0.0",
-  "main": "handler.js",
   "repository": "https://github.com/HarryPankiv/music-gen-be.git",
   "author": "Ihor Pankiv <harry.pankiv@gmail.com>",
   "license": "MIT",
   "private": true,
+  "scripts": {
+    "start": "serverless offline",
+    "build": "serverless package",
+    "deploy": "serverless deploy"
+  },
   "dependencies": {
     "@magenta/music": "^1.15.0",
     "@tonaljs/tonal": "^4.0.1",
     "aws-sdk": "^2.683.0",
+    "node-fetch": "^2.6.0",
     "uuid": "^8.1.0"
   },
   "devDependencies": {
@@ -19,6 +24,7 @@
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-env": "^1.7.0",
     "serverless": "^1.71.3",
+    "serverless-offline": "^6.3.0",
     "serverless-webpack": "^5.3.2",
     "webpack": "^4.43.0",
     "webpack-node-externals": "^1.7.2"
