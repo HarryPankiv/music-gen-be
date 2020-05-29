@@ -1,28 +1,32 @@
-import { v4 as uuidv4 } from 'uuid';
-import { Progression } from '@tonaljs/tonal'
+import { Progression } from "@tonaljs/tonal";
+import { v4 as uuidv4 } from "uuid";
 
 import { dynamodb } from "../utils/aws";
-import { generateMusic } from '../tfjs/tfjs';
+import { generateMusic } from "../tfjs/tfjs";
 
 module.exports.generateAudio = async ({ body }) => {
-  const requestBody = body ? JSON.parse(body) : {}
-  const chordProgression = Progression.fromRomanNumerals(requestBody.key, requestBody.chordProgression);
-  const sequence = await generateMusic(chordProgression)
+  const requestBody = body ? JSON.parse(body) : {};
+  const chordProgression = Progression.fromRomanNumerals(
+    requestBody.tonic,
+    requestBody.chordProgression
+  );
+  const sequence = await generateMusic(chordProgression);
 
   const project = {
     id: uuidv4(),
-    key: requestBody.key,
+    createdAt: new Date(),
+    tonic: requestBody.tonic,
     mode: requestBody.mode,
     scale: requestBody.scale,
     tempo: requestBody.tempo,
     chordProgression: requestBody.chordProgression,
     instruments: requestBody.instruments,
-    sequence
-  }
+    sequence,
+  };
 
   const params = {
     TableName: "project",
-    Item: project
+    Item: project,
   };
 
   try {
