@@ -1,9 +1,16 @@
-import { MusicVAE, MusicRNN, sequences } from "@magenta/music";
 import {
   drumVAECheckpoint,
   drumRNNCheckpoint,
   melodyRNNCheckpoint,
 } from "./constants";
+
+import { MusicVAE } from "@magenta/music/node/music_vae";
+import { MusicRNN } from "@magenta/music/node/music_rnn";
+import { sequences } from "@magenta/music/node/core";
+
+const globalAny = global;
+globalAny.performance = Date;
+globalAny.fetch = require("node-fetch");
 
 // Drum Models
 const drum_vae = new MusicVAE(drumVAECheckpoint);
@@ -16,7 +23,7 @@ const initializeModels = async () => {
   await drum_vae.initialize();
   await drum_rnn.initialize();
   await melody_rnn.initialize();
-}
+};
 
 const generateDrums = async () => {
   const drum_samples = await drum_vae.sample(1);
@@ -73,7 +80,7 @@ const mergeSequences = (generatedSequences) => {
 };
 
 export const generateMusic = async (chordProgression) => {
-  await initializeModels()
+  await initializeModels();
   const drums = await generateDrums();
   const bass = await generateMelody(chordProgression, 32, 1, 75);
   bass.notes.forEach((note, index) => {
