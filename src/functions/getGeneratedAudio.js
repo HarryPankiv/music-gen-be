@@ -5,15 +5,14 @@ module.exports.getGeneratedAudio = async ({
   queryStringParameters: { projectId },
 }) => {
   const params = {
-    ExpressionAttributeValues: {
-      ":projectId": projectId,
+    Key: {
+      id: projectId,
     },
-    KeyConditionExpression: "id = :projectId",
     TableName: "project",
   };
 
   try {
-    const result = await dynamodb.query(params).promise();
+    const result = await dynamodb.get(params).promise();
 
     return {
       statusCode: 200,
@@ -23,7 +22,7 @@ module.exports.getGeneratedAudio = async ({
       },
       body: JSON.stringify(
         {
-          result,
+          ...result.Item,
         },
         null,
         2

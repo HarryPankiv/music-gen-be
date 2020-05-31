@@ -12,9 +12,12 @@ module.exports.generateAudio = async ({ body }) => {
   );
   const sequence = await generateMusic(chordProgression);
 
+  const projectId = uuidv4()
+
   const project = {
-    id: uuidv4(),
+    id: projectId,
     createdAt: new Date(),
+    urlHash: '/' + projectId,
     tonic: requestBody.tonic,
     mode: requestBody.mode,
     scale: requestBody.scale,
@@ -30,7 +33,7 @@ module.exports.generateAudio = async ({ body }) => {
   };
 
   try {
-    const result = await dynamodb.put(params).promise();
+    await dynamodb.put(params).promise();
 
     return {
       statusCode: 200,
@@ -40,7 +43,7 @@ module.exports.generateAudio = async ({ body }) => {
       },
       body: JSON.stringify(
         {
-          result,
+          projectId,
         },
         null,
         2
