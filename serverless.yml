@@ -6,23 +6,27 @@ provider:
   name: aws
   runtime: nodejs12.x
   iamRoleStatements:
-    -  Effect: "Allow"
-       Action:
-         - "dynamodb:Scan"
-       Resource: "arn:aws:dynamodb:us-east-1:225558997672:table/project"
+    - Effect: "Allow"
+      Action:
+        - "dynamodb:Scan"
+      Resource: "arn:aws:dynamodb:us-east-1:225558997672:table/project"
 
-outputs:
-  custom-output: any-value-here
-  
-# package:
-#   excludeDevDependencies: false
 plugins:
   - serverless-webpack
+  # - serverless-dynamodb-local
   - serverless-offline
 
 webpack:
-    webpackConfig: ./webpack.config.js
-    includeModules: true
+  webpackConfig: ./webpack.config.js
+  includeModules: true
+
+custom:
+  serverless-offline:
+    httpPort: 7000
+    stageVariables:
+  # dynamodb:
+  #   stages:
+  #     - dev
 
 functions:
   getGeneratedAudio:
@@ -44,3 +48,31 @@ functions:
           path: generateAudio
           method: post
           cors: true
+  
+  exportMidi:
+    handler: src/functions/exportMidi.exportMidi
+    events:
+      - http:
+          path: exportMidi
+          method: post
+          cors: true
+          request:
+            parameters:
+              querystrings:
+                projectId: true
+
+# resources:
+#   Resources:
+#     project:
+#       Type: AWS::DynamoDB::Table
+#       Properties:
+#         TableName: project
+#         AttributeDefinitions:
+#           - AttributeName: id
+#             AttributeType: S
+#         KeySchema:
+#           - AttributeName: id
+#             KeyType: HASH
+#         ProvisionedThroughput:
+#           ReadCapacityUnits: 1
+#           WriteCapacityUnits: 1

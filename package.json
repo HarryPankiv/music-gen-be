@@ -6,15 +6,17 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "start": "serverless offline",
+    "start:local": "serverless offline",
     "build": "serverless package",
-    "deploy": "serverless deploy"
+    "deploy": "serverless deploy",
+    "run:db": "serverless dynamodb start"
   },
   "dependencies": {
     "@magenta/music": "^1.15.0",
     "@tonaljs/tonal": "^4.0.1",
     "aws-sdk": "^2.683.0",
     "node-fetch": "^2.6.0",
+    "serverless-dynamodb-local": "^0.2.39",
     "uuid": "^8.1.0"
   },
   "devDependencies": {
