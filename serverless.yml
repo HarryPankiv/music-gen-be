@@ -9,6 +9,7 @@ provider:
     - Effect: "Allow"
       Action:
         - "dynamodb:Scan"
+        - "dynamodb:GetItem"
       Resource: "arn:aws:dynamodb:us-east-1:225558997672:table/project"
 
 plugins:

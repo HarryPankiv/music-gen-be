@@ -5,6 +5,8 @@ export const drumRNNCheckpoint =
 export const melodyRNNCheckpoint =
   "https://storage.googleapis.com/magentadata/js/checkpoints/music_rnn/chord_pitches_improv";
 
-export const NUM_REPS = 6;
+export const NUM_REPS = 7;
 export const STEPS_PER_CHORD = 16;
-export const STEPS_PER_PROG = 4 * STEPS_PER_CHORD;
+export const STEPS_PER_BEAT = 4 * STEPS_PER_CHORD;
+
+export const QUANTIZED_LENGTH = (NUM_REPS - 1) * 16 - 4

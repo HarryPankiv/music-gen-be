@@ -4,12 +4,17 @@ import {
   melodyRNNCheckpoint,
   NUM_REPS,
   STEPS_PER_CHORD,
-  STEPS_PER_PROG,
+  STEPS_PER_BEAT,
 } from "./constants";
 
+import { map, range } from "ramda";
 import { MusicVAE } from "@magenta/music/node/music_vae";
 import { MusicRNN } from "@magenta/music/node/music_rnn";
-import { sequences } from "@magenta/music/node/core";
+import {
+  sequences,
+  chords as mmChords,
+  sequenceProtoToMidi,
+} from "@magenta/music/node/core";
 
 const globalAny = global;
 globalAny.performance = Date;
@@ -29,12 +34,19 @@ const initializeModels = async () => {
 };
 
 const generateDrums = async (qpm) => {
-  const drum_samples = await drum_vae.sample(1, 1, undefined, 2, qpm / 2);
+  const drum_samples = await drum_vae.sample(1, 1, undefined, 2);
   const continuedSequence = await drum_rnn.continueSequence(
     drum_samples[0],
-    STEPS_PER_PROG + (NUM_REPS - 1) * STEPS_PER_PROG,
+    STEPS_PER_BEAT + (NUM_REPS - 1) * STEPS_PER_BEAT,
     0.9
   );
+
+  continuedSequence.notes = continuedSequence.notes.map((el) => {
+    el.instrument = 1;
+    el.program = 1;
+    el.velocity = 100;
+    return el;
+  });
 
   return continuedSequence;
 };
@@ -45,7 +57,6 @@ const generateMelody = async (
   instrument,
   velocity
 ) => {
-  await melody_rnn.initialize();
   const melody_samples = {
     quantizationInfo: { stepsPerQuarter: 4 },
     notes: [],
@@ -53,7 +64,7 @@ const generateMelody = async (
   };
   const continuedSequence = await melody_rnn.continueSequence(
     melody_samples,
-    STEPS_PER_PROG + (NUM_REPS - 1) * STEPS_PER_PROG,
+    STEPS_PER_BEAT + (NUM_REPS - 1) * STEPS_PER_BEAT,
     0.9,
     chordProgression
   );
@@ -86,15 +97,28 @@ export const generateMusic = async (chordProgression, qpm = 120) => {
   await initializeModels();
   const drums = await generateDrums(qpm);
   const bass = await generateMelody(chordProgression, 32, 1, 75);
-  bass.notes.forEach((note, index) => {
-    bass.notes[index].pitch = note.pitch - 32;
+
+  bass.notes = bass.notes.map(note => {
+    note.pitch = note.pitch - 32;
+    note.instrument = 3;
+    note.velocity = 100;
+    note.program = 32;
+    return note;
   });
+
   const melody = await generateMelody(chordProgression, 10, 2, 100);
 
-  const chordSequence = createChordSequence(chordProgression, melody);
-  const mergedChordsSequence = mergeChordsToGenerated(melody, chordSequence);
+  melody.notes = melody.notes.map(note => {
+    note.instrument = 4;
+    note.velocity = 100;
+    note.program = 12;
+    return note;
+  });
 
-  return mergeSequences([drums, mergedChordsSequence, bass]);
+  const chordSequence = createChordSequence(chordProgression, melody);
+  const mergedSequences = mergeSequences([drums, chordSequence, bass, melody]);
+
+  return mergedSequences;
 };
 
 const createChordSequence = (chords, melody) => {
@@ -106,18 +130,20 @@ const createChordSequence = (chords, melody) => {
       notes.push({
         instrument: 1,
         program: 0,
+        velocity: 100,
         pitch: 36 + root,
-        quantizedStartStep: i * STEPS_PER_PROG + j * STEPS_PER_CHORD,
-        quantizedEndStep: i * STEPS_PER_PROG + (j + 1) * STEPS_PER_CHORD,
+        quantizedStartStep: i * STEPS_PER_BEAT + j * STEPS_PER_CHORD,
+        quantizedEndStep: i * STEPS_PER_BEAT + (j + 1) * STEPS_PER_CHORD,
       });
 
       mmChords.ChordSymbols.pitches(chord).forEach((pitch, k) => {
         notes.push({
           instrument: 2,
           program: 0,
+          velocity: 100,
           pitch: 48 + pitch,
-          quantizedStartStep: i * STEPS_PER_PROG + j * STEPS_PER_CHORD,
-          quantizedEndStep: i * STEPS_PER_PROG + (j + 1) * STEPS_PER_CHORD,
+          quantizedStartStep: i * STEPS_PER_BEAT + j * STEPS_PER_CHORD,
+          quantizedEndStep: i * STEPS_PER_BEAT + (j + 1) * STEPS_PER_CHORD,
         });
       });
     });
@@ -126,14 +152,4 @@ const createChordSequence = (chords, melody) => {
   seq.notes = notes;
 
   return seq;
-};
-
-const mergeChordsToGenerated = (genSeq, chordsSeq) => {
-  genSeq.notes.forEach((note) => {
-    note.quantizedStartStep += 1;
-    note.quantizedEndStep += 1;
-    note.instrument = 0;
-    chordsSeq.notes.push(note);
-  });
-  return chordsSeq;
 };

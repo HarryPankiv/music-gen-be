@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { dynamodb } from "../utils/aws";
 import { generateMusic } from "../tfjs/tfjs";
+import { QUANTIZED_LENGTH } from "../tfjs/constants";
 
 module.exports.generateAudio = async ({ body }) => {
   const requestBody = body ? JSON.parse(body) : {};
@@ -10,7 +11,7 @@ module.exports.generateAudio = async ({ body }) => {
     requestBody.tonic,
     requestBody.chordProgression
   );
-  const sequence = await generateMusic(chordProgression);
+  const sequence = await generateMusic(chordProgression, requestBody.tempo);
 
   const projectId = uuidv4()
 
@@ -22,6 +23,7 @@ module.exports.generateAudio = async ({ body }) => {
     mode: requestBody.mode,
     scale: requestBody.scale,
     tempo: requestBody.tempo,
+    length: Math.round(QUANTIZED_LENGTH * requestBody.tempo / 120),
     chordProgression: requestBody.chordProgression,
     instruments: requestBody.instruments,
     sequence,
