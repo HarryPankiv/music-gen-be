@@ -5,11 +5,13 @@ org: harrypankiv
 provider:
   name: aws
   runtime: nodejs12.x
+  timeout: 60
   iamRoleStatements:
     - Effect: "Allow"
       Action:
         - "dynamodb:Scan"
         - "dynamodb:GetItem"
+        - "dynamodb:PutItem"
       Resource: "arn:aws:dynamodb:us-east-1:225558997672:table/project"
 
 plugins:
@@ -17,11 +19,10 @@ plugins:
   # - serverless-dynamodb-local
   - serverless-offline
 
-webpack:
-  webpackConfig: ./webpack.config.js
-  includeModules: true
-
 custom:
+  webpack:
+    webpackConfig: ./webpack.config.js
+    includeModules: true
   serverless-offline:
     httpPort: 7000
     stageVariables:
