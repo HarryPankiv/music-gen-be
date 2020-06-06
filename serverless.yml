@@ -9,10 +9,18 @@ provider:
   iamRoleStatements:
     - Effect: "Allow"
       Action:
-        - "dynamodb:Scan"
         - "dynamodb:GetItem"
         - "dynamodb:PutItem"
+        - "dynamodb:UpdateItem"
       Resource: "arn:aws:dynamodb:us-east-1:225558997672:table/project"
+    - Effect: "Allow"
+      Action:
+        - "SNS:Publish"
+      Resource: "arn:aws:sns:us-east-1:225558997672:CustomGenerateTopic"
+    - Effect: "Allow"
+      Action:
+        - "Cloudwatch:*"
+      Resource: "arn:aws:logs:us-east-1:225558997672:log-group:*"
 
 plugins:
   - serverless-webpack
@@ -50,7 +58,7 @@ functions:
           path: generateAudio
           method: post
           cors: true
-  
+
   exportMidi:
     handler: src/functions/exportMidi.exportMidi
     events:
@@ -63,6 +71,19 @@ functions:
               querystrings:
                 projectId: true
 
+  generate:
+    handler: src/functions/generate.generate
+    events:
+      - sns:
+          arn: !Ref GenerateTopic
+          topicName: CustomGenerateTopic
+
+resources:
+  Resources:
+    GenerateTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: CustomGenerateTopic
 # resources:
 #   Resources:
 #     project:
